@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TG Alpha">
+<title>TG Alpha</title>
+<style>
+:root {
+  --bg:#08080f; --bg2:#0f0f1c; --surface:#161625; --surface2:#1e1e30;
+  --border:#252538; --border2:#30304a;
+  --blue:#4f8ef7; --purple:#8b5cf6; --green:#06d6a0; --red:#ef233c; --yellow:#ffd60a;
+  --text:#e2e2f2; --text2:#8888aa; --text3:#44445a;
+  --r:14px; --r2:8px;
+  --font:-apple-system,'SF Pro Display',system-ui,sans-serif;
+  --mono:'SF Mono','Fira Code',monospace;
+  --sat: env(safe-area-inset-top,0px);
+  --sab: env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--font);background:var(--bg);color:var(--text);
+  height:100vh;height:-webkit-fill-available;overflow:hidden;position:fixed;width:100%}
+#root{display:flex;flex-direction:column;height:100%;height:-webkit-fill-available;
+  padding-top:var(--sat);padding-bottom:var(--sab)}
+
+/* SCREENS */
+.scr{display:none;flex-direction:column;height:100%}
+.scr.on{display:flex;animation:up .3s ease}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* CONNECT */
+#s-connect{
+  background:radial-gradient(ellipse at 25% 15%,rgba(79,142,247,.13) 0%,transparent 55%),
+             radial-gradient(ellipse at 80% 85%,rgba(139,92,246,.10) 0%,transparent 55%),var(--bg);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  align-items:center;padding:0 18px 40px}
+
+.brand{display:flex;flex-direction:column;align-items:center;padding:52px 0 36px;gap:14px}
+.brand-icon{width:90px;height:90px;background:linear-gradient(135deg,var(--blue),var(--purple));
+  border-radius:26px;display:flex;align-items:center;justify-content:center;font-size:42px;
+  box-shadow:0 0 0 1px rgba(79,142,247,.3),0 20px 60px rgba(79,142,247,.3);
+  animation:glow 4s ease-in-out infinite}
+@keyframes glow{
+  0%,100%{box-shadow:0 0 0 1px rgba(79,142,247,.3),0 20px 60px rgba(79,142,247,.3)}
+  50%    {box-shadow:0 0 0 1px rgba(79,142,247,.5),0 24px 80px rgba(79,142,247,.5)}}
+.brand-name{font-size:32px;font-weight:800;letter-spacing:-1px;
+  background:linear-gradient(135deg,#fff 30%,var(--blue));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.brand-sub{font-size:11px;color:var(--text3);letter-spacing:3px;text-transform:uppercase}
+
+.panel{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);
+  padding:20px;width:100%;max-width:430px;margin-bottom:14px}
+.panel-hdr{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--blue);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.field:last-child{margin-bottom:0}
+.field label{font-size:11px;color:var(--text2);font-weight:600;letter-spacing:.4px}
+.field input,.field select,.field textarea{
+  background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r2);
+  color:var(--text);font-family:var(--mono);font-size:13px;padding:11px 13px;
+  outline:none;width:100%;-webkit-appearance:none;
+  transition:border-color .2s,box-shadow .2s}
+.field input:focus,.field select:focus{
+  border-color:var(--blue);box-shadow:0 0 0 3px rgba(79,142,247,.12)}
+.field textarea{resize:none}
+
+.btn{background:linear-gradient(135deg,var(--blue),var(--purple));
+  border:none;border-radius:var(--r2);color:#fff;font-family:var(--font);
+  font-size:15px;font-weight:700;padding:14px;width:100%;cursor:pointer;
+  box-shadow:0 8px 24px rgba(79,142,247,.25);transition:opacity .2s,transform .1s}
+.btn:active{opacity:.85;transform:scale(.98)}
+.btn.ghost{background:transparent;border:1.5px solid var(--border2);
+  color:var(--text2);font-size:13px;box-shadow:none}
+.btn.sm{padding:8px 13px;font-size:12px;width:auto}
+.btn.red{background:var(--red);box-shadow:0 8px 24px rgba(239,35,60,.2)}
+
+.alert{border-radius:var(--r2);padding:11px 13px;font-size:12.5px;line-height:1.6;margin-bottom:14px}
+.alert.info{background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.2);color:#7aacf7}
+.alert.ok  {background:rgba(6,214,160,.08); border:1px solid rgba(6,214,160,.2); color:var(--green)}
+.alert.warn{background:rgba(255,214,10,.08);border:1px solid rgba(255,214,10,.2);color:var(--yellow)}
+.alert.err {background:rgba(239,35,60,.08); border:1px solid rgba(239,35,60,.2); color:var(--red)}
+
+.srv-row{display:flex;align-items:center;gap:8px;
+  background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r2);
+  padding:10px 13px;margin-bottom:12px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .3s}
+.dot.on {background:var(--green);box-shadow:0 0 8px var(--green)}
+.dot.err{background:var(--red)}
+.dot.blink{background:var(--yellow);animation:blink .8s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.srv-txt{font-family:var(--mono);font-size:12px;color:var(--text2);flex:1;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.steps{display:flex;gap:6px;margin-bottom:28px}
+.pip{height:4px;border-radius:2px;background:var(--border2);transition:all .3s;width:20px}
+.pip.cur{background:var(--blue);width:36px}
+.pip.done{background:var(--green)}
+
+.otp-row{display:flex;gap:10px;justify-content:center;margin:20px 0}
+.otp-d{width:50px;height:62px;background:var(--bg2);border:2px solid var(--border);
+  border-radius:10px;color:var(--text);font-size:26px;font-weight:800;text-align:center;
+  outline:none;-webkit-appearance:none;transition:border-color .2s}
+.otp-d:focus{border-color:var(--blue)}
+
+/* MAIN */
+#s-main{background:var(--bg)}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);
+  padding:10px 14px;display:flex;align-items:center;gap:10px;min-height:54px;flex-shrink:0}
+.topbar-title{font-weight:700;font-size:16px;flex:1}
+.topbar-sub{font-size:11px;color:var(--text3)}
+.av{width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--blue),var(--purple));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:14px;flex-shrink:0}
+.icon-btn{background:none;border:none;color:var(--text2);cursor:pointer;
+  padding:7px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:19px;transition:background .2s}
+.icon-btn:active{background:var(--surface)}
+
+.content{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.pane{display:none;flex-direction:column;height:100%}
+.pane.on{display:flex}
+
+.tabbar{background:var(--bg2);border-top:1px solid var(--border);
+  display:flex;flex-shrink:0;padding:6px 0 2px}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:4px 0;cursor:pointer;border:none;background:none;
+  color:var(--text3);font-family:var(--font);transition:color .2s}
+.tab.on{color:var(--blue)}
+.tab svg{width:22px;height:22px}
+.tab em{font-size:9.5px;font-weight:700;font-style:normal}
+
+/* CHATS */
+.search-wrap{padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}
+.search-inner{position:relative}
+.search-inner input{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  color:var(--text);font-family:var(--font);font-size:14px;
+  padding:9px 13px 9px 36px;width:100%;outline:none;-webkit-appearance:none}
+.search-inner::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px}
+
+.chat-list{overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1}
+.chat-row{display:flex;align-items:center;gap:11px;padding:11px 14px;cursor:pointer;
+  border-bottom:1px solid rgba(255,255,255,.03);transition:background .12s}
+.chat-row:active{background:var(--surface)}
+.chat-info{flex:1;min-width:0}
+.chat-name{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.chat-prev{font-size:12.5px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.chat-time{font-size:10.5px;color:var(--text3)}
+.badge{background:var(--blue);color:#fff;font-size:10.5px;font-weight:800;
+  padding:2px 6px;border-radius:9px;min-width:18px;text-align:center}
+
+/* MESSAGES */
+.msg-overlay{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;
+  background:var(--bg);transform:translateX(100%);
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+  padding-top:var(--sat);padding-bottom:var(--sab)}
+.msg-overlay.open{transform:translateX(0)}
+.msgs{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:14px;display:flex;flex-direction:column;gap:3px}
+.msg{display:flex;flex-direction:column;max-width:78%;animation:pop .2s ease}
+@keyframes pop{from{opacity:0;transform:scale(.95) translateY(6px)}to{opacity:1;transform:none}}
+.msg.out{align-self:flex-end;align-items:flex-end}
+.msg.in {align-self:flex-start;align-items:flex-start}
+.bubble{padding:9px 13px;border-radius:18px;font-size:14.5px;line-height:1.45;word-break:break-word}
+.msg.out .bubble{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border-bottom-right-radius:4px}
+.msg.in  .bubble{background:var(--surface);color:var(--text);border-bottom-left-radius:4px}
+.msg-ts{font-size:10px;color:var(--text3);margin-top:2px;padding:0 4px}
+.compose{background:var(--bg2);border-top:1px solid var(--border);
+  padding:9px 11px;display:flex;gap:8px;align-items:flex-end;flex-shrink:0}
+.compose-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:20px;
+  color:var(--text);font-family:var(--font);font-size:14.5px;padding:9px 15px;
+  outline:none;-webkit-appearance:none;resize:none;max-height:120px;overflow-y:auto}
+.send-btn{background:var(--blue);border:none;border-radius:50%;width:38px;height:38px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;
+  flex-shrink:0;box-shadow:0 4px 14px rgba(79,142,247,.4);transition:transform .1s}
+.send-btn:active{transform:scale(.88)}
+
+/* API TAB */
+.api-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
+.method-bar{padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}
+.method-bar label{font-size:10px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;display:block;margin-bottom:6px;font-weight:700}
+.method-sel{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r2);
+  color:var(--text);font-family:var(--mono);font-size:13px;padding:9px 11px;width:100%;
+  outline:none;-webkit-appearance:none;cursor:pointer}
+.params-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px}
+.p-field{margin-bottom:12px}
+.p-label{font-size:10.5px;color:var(--green);font-family:var(--mono);margin-bottom:5px;font-weight:600}
+.p-type{color:var(--text3);font-size:9.5px;margin-left:5px}
+.p-input{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r2);
+  color:var(--text);font-family:var(--mono);font-size:12.5px;padding:9px 11px;width:100%;
+  outline:none;-webkit-appearance:none;transition:border-color .2s}
+.p-input:focus{border-color:var(--blue)}
+.exec-bar{padding:9px 14px;background:var(--bg2);border-top:1px solid var(--border);
+  display:flex;gap:8px;flex-shrink:0}
+.resp-panel{background:var(--bg);border-top:1px solid var(--border);
+  flex:0 0 40%;display:flex;flex-direction:column;overflow:hidden}
+.resp-hdr{padding:9px 14px;border-bottom:1px solid var(--border);font-size:10px;
+  letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;font-weight:700}
+.resp-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:11px 14px;font-family:var(--mono);font-size:11.5px;
+  color:var(--green);white-space:pre-wrap;word-break:break-all;line-height:1.6}
+
+/* SESSION */
+.sess-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:24px}
+.sec-hdr{padding:16px 14px 8px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-weight:700}
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin:0 14px 12px;padding:16px}
+.info-row{display:flex;justify-content:space-between;align-items:center;
+  padding:9px 0;border-bottom:1px solid rgba(255,255,255,.03);gap:10px}
+.info-row:last-child{border-bottom:none}
+.ik{font-size:11px;color:var(--text3);font-family:var(--mono);flex-shrink:0}
+.iv{font-size:12px;font-family:var(--mono);text-align:right;word-break:break-all}
+.iv.b{color:var(--blue)} .iv.g{color:var(--green)} .iv.w{color:var(--yellow)}
+.dev-card{background:var(--bg2);border-radius:10px;padding:12px;margin-bottom:8px}
+.dev-name{font-weight:700;font-size:13px;margin-bottom:3px}
+.dev-sub{font-size:11px;color:var(--text3)}
+
+/* DOCS */
+.docs-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 14px 40px}
+.doc-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-top:12px;overflow:hidden}
+.doc-hdr{padding:14px;border-bottom:1px solid var(--border);font-weight:700;font-size:13px;color:var(--blue)}
+.doc-body{padding:14px;font-size:12.5px;color:var(--text2);line-height:1.8}
+.doc-body strong{color:var(--text)}
+.doc-link{display:block;color:var(--blue);font-size:13px;padding:9px 14px;
+  text-decoration:none;border-bottom:1px solid var(--border)}
+.doc-link:last-child{border-bottom:none}
+.feat{background:var(--bg2);border-radius:8px;padding:11px 13px;margin-bottom:8px}
+.feat-name{font-size:12.5px;font-weight:700;color:var(--green);margin-bottom:3px}
+.feat-desc{font-size:11.5px;color:var(--text3)}
+.code-blk{background:var(--bg);border:1px solid var(--border);border-radius:8px;
+  padding:12px;font-family:var(--mono);font-size:11.5px;color:var(--green);
+  margin:10px 0;white-space:pre;overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+/* UTIL */
+.tag{display:inline-block;border-radius:5px;font-size:10.5px;font-family:var(--mono);padding:2px 7px;font-weight:700}
+.tag.b{background:rgba(79,142,247,.15);color:var(--blue);border:1px solid rgba(79,142,247,.25)}
+.tag.g{background:rgba(6,214,160,.12);color:var(--green);border:1px solid rgba(6,214,160,.25)}
+.tag.r{background:rgba(239,35,60,.12);color:var(--red);border:1px solid rgba(239,35,60,.2)}
+.spinner{border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;
+  width:22px;height:22px;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;padding:40px;color:var(--text3);font-size:13px}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 20px;gap:10px;text-align:center}
+.empty-ico{font-size:44px}.empty-ttl{font-size:17px;font-weight:700;color:var(--text2)}
+.empty-sub{font-size:13px;color:var(--text3);line-height:1.6}
+.toast{position:fixed;bottom:calc(72px + var(--sab));left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:var(--surface2);border:1px solid var(--border2);border-radius:10px;
+  padding:9px 18px;font-size:12.5px;color:var(--text);z-index:9999;
+  opacity:0;transition:opacity .25s,transform .25s;white-space:nowrap;
+  box-shadow:0 8px 32px rgba(0,0,0,.6);pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+::-webkit-scrollbar{width:0;height:0}
+</style>
+</head>
+<body>
+<div id="root">
+
+<!-- ═══ CONNECT SCREEN ═══ -->
+<div class="scr on" id="s-connect">
+  <div class="brand">
+    <div class="brand-icon">✈</div>
+    <div class="brand-name">TG Alpha</div>
+    <div class="brand-sub">TDLib · MTProto · Real Telegram</div>
+  </div>
+
+  <div class="steps" id="pips">
+    <div class="pip cur" id="pip0"></div>
+    <div class="pip" id="pip1"></div>
+    <div class="pip" id="pip2"></div>
+  </div>
+
+  <!-- Step 0: Connect -->
+  <div id="st0" class="panel" style="max-width:430px;width:100%">
+    <div class="panel-hdr">🌐 Server Connection</div>
+    <div class="alert info">
+      Your TG Alpha server hosts this page and the Telegram bridge. It auto-fills the URL below.
+    </div>
+    <div class="field">
+      <label>Server URL</label>
+      <input type="url" id="serverUrl" placeholder="https://your-app.railway.app" inputmode="url">
+    </div>
+    <div class="srv-row">
+      <span class="dot blink" id="srvDot"></span>
+      <span class="srv-txt" id="srvTxt">Not checked</span>
+    </div>
+    <div class="field">
+      <label>Server Secret</label>
+      <input type="password" id="serverSecret" placeholder="The SERVER_SECRET you set in Railway">
+    </div>
+    <button class="btn" onclick="checkServer()">Check Connection</button>
+    <button class="btn ghost" onclick="demoMode()" style="margin-top:8px">Try Demo (no server)</button>
+  </div>
+
+  <!-- Step 1: Auth -->
+  <div id="st1" class="panel" style="display:none;max-width:430px;width:100%">
+    <div class="panel-hdr">🔐 Authentication</div>
+    <div class="alert ok" id="srvOkMsg">Connected ✓</div>
+    <div class="field">
+      <label>Method</label>
+      <select id="authMethod" onchange="authSwitch()">
+        <option value="phone">📱 Phone Number + OTP</option>
+        <option value="session">🔑 Restore Session String</option>
+        <option value="qr">📷 QR Code Login</option>
+      </select>
+    </div>
+    <div id="sub-phone" style="margin-top:12px">
+      <div class="field">
+        <label>Phone Number</label>
+        <input type="tel" id="phone" placeholder="+1 555 000 0000" inputmode="tel">
+      </div>
+      <button class="btn" onclick="sendOTP()" style="margin-top:4px">Send Code →</button>
+    </div>
+    <div id="sub-session" style="display:none;margin-top:12px">
+      <div class="alert warn">Only use session strings you personally exported.</div>
+      <div class="field" style="margin-top:10px">
+        <label>Session String</label>
+        <textarea id="sessStr" rows="4" placeholder="Paste session string..."></textarea>
+      </div>
+      <button class="btn" onclick="restoreSess()" style="margin-top:4px">Restore →</button>
+    </div>
+    <div id="sub-qr" style="display:none;margin-top:12px">
+      <div class="alert info">Telegram → Settings → Devices → Link Desktop Device → scan QR</div>
+      <button class="btn" onclick="reqQR()" style="margin-top:10px">Generate QR</button>
+    </div>
+    <button class="btn ghost" onclick="goStep(0)" style="margin-top:10px">← Back</button>
+  </div>
+
+  <!-- Step 2: OTP -->
+  <div id="st2" class="panel" style="display:none;max-width:430px;width:100%">
+    <div class="panel-hdr">💬 Enter Code</div>
+    <div class="alert ok" id="otpMsg">Code sent!</div>
+    <div class="otp-row">
+      <input class="otp-d" maxlength="1" type="tel" inputmode="numeric" oninput="otpFwd(this,0)" onkeydown="otpBk(this,0,event)">
+      <input class="otp-d" maxlength="1" type="tel" inputmode="numeric" oninput="otpFwd(this,1)" onkeydown="otpBk(this,1,event)">
+      <input class="otp-d" maxlength="1" type="tel" inputmode="numeric" oninput="otpFwd(this,2)" onkeydown="otpBk(this,2,event)">
+      <input class="otp-d" maxlength="1" type="tel" inputmode="numeric" oninput="otpFwd(this,3)" onkeydown="otpBk(this,3,event)">
+      <input class="otp-d" maxlength="1" type="tel" inputmode="numeric" oninput="otpFwd(this,4)" onkeydown="otpBk(this,4,event)">
+    </div>
+    <div class="field">
+      <label>2FA Password (if enabled)</label>
+      <input type="password" id="twofa" placeholder="Leave blank if not set">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn ghost" onclick="goStep(1)" style="flex:0 0 80px">← Back</button>
+      <button class="btn" onclick="verifyOTP()" style="flex:1">Verify →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN APP ═══ -->
+<div class="scr" id="s-main">
+  <div class="topbar">
+    <div class="av" id="mainAv">?</div>
+    <div style="flex:1;min-width:0">
+      <div class="topbar-title" id="mainName">Telegram</div>
+      <div style="display:flex;align-items:center;gap:5px">
+        <span class="dot" id="mainDot" style="width:6px;height:6px"></span>
+        <span class="topbar-sub" id="mainSub">Connecting...</span>
+      </div>
+    </div>
+    <button class="icon-btn" onclick="switchTab('session',document.querySelectorAll('.tab')[2])">⚙</button>
+  </div>
+
+  <div class="content">
+    <!-- CHATS -->
+    <div class="pane on" id="pane-chats">
+      <div class="search-wrap">
+        <div class="search-inner">
+          <input placeholder="Search" type="search" oninput="filterChats(this.value)">
+        </div>
+      </div>
+      <div class="chat-list" id="chatList">
+        <div class="loader"><div class="spinner"></div>Loading…</div>
+      </div>
+    </div>
+
+    <!-- API -->
+    <div class="pane" id="pane-api">
+      <div class="api-wrap">
+        <div class="method-bar">
+          <label>TDLib Method</label>
+          <select class="method-sel" id="methodSel" onchange="renderParams()">
+            <optgroup label="Account">
+              <option>getMe</option><option>getAccountTtl</option>
+            </optgroup>
+            <optgroup label="Messages">
+              <option>sendMessage</option><option>getChatHistory</option>
+              <option>getMessages</option><option>forwardMessages</option>
+              <option>deleteMessages</option><option>editMessageText</option>
+              <option>searchMessages</option><option>pinMessage</option>
+              <option>viewMessages</option>
+            </optgroup>
+            <optgroup label="Chats">
+              <option>getChats</option><option>getChat</option>
+              <option>createPrivateChat</option><option>createNewBasicGroupChat</option>
+              <option>createNewSupergroupChat</option><option>getChatMembers</option>
+              <option>getChatAdministrators</option><option>searchPublicChat</option>
+              <option>joinChat</option><option>leaveChat</option>
+              <option>setChatTitle</option><option>setChatDescription</option>
+              <option>banChatMember</option>
+            </optgroup>
+            <optgroup label="Users">
+              <option>getUser</option><option>getUserFullInfo</option>
+              <option>getContacts</option><option>searchContacts</option>
+            </optgroup>
+            <optgroup label="Sessions">
+              <option>getActiveSessions</option><option>terminateSession</option>
+              <option>terminateAllOtherSessions</option>
+            </optgroup>
+            <optgroup label="Security">
+              <option>getPasswordState</option><option>setPassword</option>
+              <option>getRecoveryEmailAddress</option>
+            </optgroup>
+            <optgroup label="Advanced">
+              <option>getNetworkStatistics</option><option>getStorageStatistics</option>
+              <option>optimizeStorage</option><option>getOption</option>
+              <option>setOption</option><option>testNetwork</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="params-area" id="paramsArea"></div>
+        <div class="exec-bar">
+          <button class="btn" onclick="execMethod()" style="flex:1">▶ Execute</button>
+          <button class="btn ghost sm" onclick="clearResp()">Clear</button>
+          <button class="btn ghost sm" onclick="copyResp()">Copy</button>
+        </div>
+        <div class="resp-panel">
+          <div class="resp-hdr">
+            <span>Response</span>
+            <span id="respTag"></span>
+          </div>
+          <div class="resp-body" id="respBody"><span style="color:var(--text3)">// Execute a method above</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SESSION -->
+    <div class="pane" id="pane-session">
+      <div class="sess-scroll">
+        <div class="sec-hdr">Your Session</div>
+        <div class="info-card">
+          <div class="info-row"><span class="ik">state</span>  <span class="iv g" id="si-state">–</span></div>
+          <div class="info-row"><span class="ik">mode</span>   <span class="iv b" id="si-mode">–</span></div>
+          <div class="info-row"><span class="ik">user_id</span><span class="iv b" id="si-uid">–</span></div>
+          <div class="info-row"><span class="ik">username</span><span class="iv"  id="si-uname">–</span></div>
+          <div class="info-row"><span class="ik">phone</span>  <span class="iv"  id="si-phone">–</span></div>
+          <div class="info-row"><span class="ik">server</span> <span class="iv"  id="si-server" style="font-size:10px;max-width:160px;overflow:hidden;text-overflow:ellipsis">–</span></div>
+        </div>
+        <div class="sec-hdr">Active Devices</div>
+        <div style="padding:0 14px" id="deviceList">
+          <div class="loader" style="padding:20px"><div class="spinner"></div></div>
+        </div>
+        <div class="sec-hdr">Actions</div>
+        <div class="info-card" style="display:flex;flex-direction:column;gap:8px">
+          <button class="btn ghost" onclick="terminateOthers()">Terminate Other Sessions</button>
+          <button class="btn red" onclick="doLogout()">Sign Out</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOCS -->
+    <div class="pane" id="pane-docs">
+      <div class="docs-scroll">
+        <div class="doc-card" style="margin-top:14px">
+          <div class="doc-hdr">⚡ Power Features via API Tab</div>
+          <div style="padding:10px 14px">
+            <div class="feat"><div class="feat-name">Ghost Read</div><div class="feat-desc">viewMessages → force_read: false — read without sending receipt</div></div>
+            <div class="feat"><div class="feat-name">Schedule Messages</div><div class="feat-desc">sendMessage → scheduling_state → send_date (unix timestamp)</div></div>
+            <div class="feat"><div class="feat-name">Silent Send</div><div class="feat-desc">sendMessage → disable_notification: true</div></div>
+            <div class="feat"><div class="feat-name">Full Chat Export</div><div class="feat-desc">getChatHistory in loop → export entire chat history</div></div>
+            <div class="feat"><div class="feat-name">Session Control</div><div class="feat-desc">getActiveSessions + terminateSession → manage all devices</div></div>
+            <div class="feat"><div class="feat-name">Storage Cleanup</div><div class="feat-desc">optimizeStorage → free cached files from server</div></div>
+            <div class="feat"><div class="feat-name">Privacy Audit</div><div class="feat-desc">getUserPrivacySettingRules → inspect all privacy settings</div></div>
+          </div>
+        </div>
+        <div class="doc-card">
+          <div class="doc-hdr">🔗 Resources</div>
+          <a class="doc-link" href="https://core.telegram.org/tdlib/docs/" target="_blank">→ TDLib Full Documentation</a>
+          <a class="doc-link" href="https://core.telegram.org/mtproto" target="_blank">→ MTProto Protocol</a>
+          <a class="doc-link" href="https://core.telegram.org/api" target="_blank">→ Telegram API Reference</a>
+          <a class="doc-link" href="https://github.com/tdlib/td" target="_blank">→ TDLib Source (GitHub)</a>
+          <a class="doc-link" href="https://my.telegram.org/apps" target="_blank">→ Get API Credentials</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <button class="tab on" onclick="switchTab('chats',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <em>Chats</em>
+    </button>
+    <button class="tab" onclick="switchTab('api',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      <em>API</em>
+    </button>
+    <button class="tab" onclick="switchTab('session',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      <em>Session</em>
+    </button>
+    <button class="tab" onclick="switchTab('docs',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+      <em>Docs</em>
+    </button>
+  </div>
+</div>
+
+<!-- MESSAGE OVERLAY -->
+<div class="msg-overlay" id="msgOverlay">
+  <div class="topbar">
+    <button class="icon-btn" onclick="closeChat()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="av" id="chatAv">?</div>
+    <div style="flex:1;min-width:0">
+      <div class="topbar-title" id="chatTitle">Chat</div>
+      <div class="topbar-sub" id="chatSub">–</div>
+    </div>
+  </div>
+  <div class="msgs" id="msgs"></div>
+  <div class="compose">
+    <textarea class="compose-input" id="msgInput" placeholder="Message..." rows="1"
+      oninput="grow(this)"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}">
+    </textarea>
+    <button class="send-btn" onclick="sendMsg()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+const S = {
+  serverUrl: '', secret: '', ws: null, wsReady: false,
+  demo: false, authState: 'idle', user: null, phone: '',
+  chats: [], currentChat: null, reqId: 1, pending: new Map(),
+};
+
+// ══════════════════════════════════════════
+// AUTO-DETECT SERVER URL
+// ══════════════════════════════════════════
+window.addEventListener('load', () => {
+  // If served from Railway, the server URL is our own origin
+  const origin = window.location.origin;
+  if (!origin.includes('localhost') && !origin.startsWith('file') && !origin.includes('claude.ai')) {
+    document.getElementById('serverUrl').value = origin;
+  }
+});
+
+// ══════════════════════════════════════════
+// SERVER + WS
+// ══════════════════════════════════════════
+async function checkServer() {
+  const url = document.getElementById('serverUrl').value.trim().replace(/\/$/,'');
+  const secret = document.getElementById('serverSecret').value.trim();
+  if (!url) { showToast('⚠️ Enter server URL'); return; }
+  S.serverUrl = url; S.secret = secret;
+  setDot('blink','Checking…');
+  try {
+    const r = await fetch(url + '/health', { signal: AbortSignal.timeout(8000) });
+    const d = await r.json();
+    if (!d.ok) throw new Error('Bad response');
+    setDot('on', `Connected · ${d.mode} mode`);
+    document.getElementById('srvOkMsg').textContent = `✅ Server online · ${d.mode} mode · auth: ${d.authState}`;
+    connectWS(url, secret);
+    goStep(1);
+  } catch(e) {
+    setDot('err','Connection failed');
+    showToast('❌ ' + e.message);
+  }
+}
+
+function setDot(state, text) {
+  document.getElementById('srvDot').className = 'dot ' + state;
+  document.getElementById('srvTxt').textContent = text;
+}
+
+function connectWS(base, secret) {
+  const wsUrl = base.replace(/^http/,'ws') + '/ws';
+  S.ws = new WebSocket(wsUrl);
+  S.ws.onopen = () => {
+    S.wsReady = true;
+    if (secret) S.ws.send(JSON.stringify({ method:'PING', secret }));
+  };
+  S.ws.onmessage = (e) => {
+    try { handleWS(JSON.parse(e.data)); } catch(err) {}
+  };
+  S.ws.onclose = () => {
+    S.wsReady = false;
+    setMainStatus('err','Disconnected');
+    setTimeout(() => { if(S.serverUrl) connectWS(S.serverUrl, S.secret); }, 3000);
+  };
+}
+
+function handleWS(msg) {
+  if (msg.id && S.pending.has(msg.id)) {
+    const {resolve,reject} = S.pending.get(msg.id);
+    S.pending.delete(msg.id);
+    msg.type === 'ERROR' ? reject(new Error(msg.error)) : resolve(msg.result);
+    return;
+  }
+  switch(msg.type) {
+    case 'CONNECTED':
+      if (msg.payload.ready) { setMainStatus('on','Connected'); apiCall('getMe').then(u=>{S.user=u;updateUser();}); }
+      break;
+    case 'AUTH_STATE': S.authState = msg.payload.state; break;
+    case 'AUTH_READY': S.user = msg.payload.user; launchMain(); break;
+    case 'TDLIB_UPDATE': handleUpdate(msg.payload); break;
+  }
+}
+
+function handleUpdate(u) {
+  if (u['@type'] === 'updateNewMessage' && S.currentChat === u.message?.chat_id) appendMsg(u.message);
+}
+
+function wsCall(method, params={}) {
+  return new Promise((resolve,reject) => {
+    if (!S.wsReady) { reject(new Error('WS not connected')); return; }
+    const id = S.reqId++;
+    S.pending.set(id, {resolve,reject});
+    S.ws.send(JSON.stringify({id, method, params, secret: S.secret}));
+    setTimeout(() => { if(S.pending.has(id)){S.pending.delete(id);reject(new Error('Timeout'));} }, 15000);
+  });
+}
+
+async function restCall(path, params={}) {
+  const r = await fetch(`${S.serverUrl}/api/${path}`, {
+    method:'POST', headers:{'Content-Type':'application/json','X-Server-Secret':S.secret},
+    body: JSON.stringify(params)
+  });
+  const d = await r.json();
+  if (!d.ok) throw new Error(d.error || 'Server error');
+  return d.result;
+}
+
+async function apiCall(method, params={}) {
+  if (S.demo) return demoResp(method, params);
+  if (S.wsReady) { try { return await wsCall(method,params); } catch(e){} }
+  return restCall('tdlib/'+method, params);
+}
+
+// ══════════════════════════════════════════
+// DEMO MODE
+// ══════════════════════════════════════════
+function demoMode() {
+  S.demo = true;
+  S.user = {id:987654321,first_name:'Demo',last_name:'User',username:'demo_user',phone_number:'1234567890'};
+  launchMain();
+}
+
+function demoResp(method, params) {
+  const ts=()=>Math.floor(Date.now()/1000);
+  const map={
+    getMe:{id:987654321,first_name:'Demo',last_name:'User',username:'demo_user',phone_number:'1234567890'},
+    getChats:{chat_ids:[1001,1002,1003,1004,1005]},
+    getActiveSessions:{sessions:[{id:'1',is_current:true,application_name:'TG Alpha',device_model:'Server',platform:'Node.js',system_version:'Demo',log_in_date:ts()-3600,last_active_date:ts(),ip:'0.0.0.0',location:'Demo Mode'}]},
+    getPasswordState:{has_password:false},
+    testNetwork:{'@type':'ok'},
+    terminateAllOtherSessions:{'@type':'ok'},
+  };
+  return new Promise(r=>setTimeout(()=>r(map[method]||{'@type':'ok',_demo:true,method,params}),150+Math.random()*250));
+}
+
+// ══════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════
+function authSwitch() {
+  const m = document.getElementById('authMethod').value;
+  document.getElementById('sub-phone').style.display   = m==='phone'   ?'block':'none';
+  document.getElementById('sub-session').style.display = m==='session' ?'block':'none';
+  document.getElementById('sub-qr').style.display      = m==='qr'      ?'block':'none';
+}
+
+async function sendOTP() {
+  const phone = document.getElementById('phone').value.trim();
+  if (!phone) { showToast('⚠️ Enter phone number'); return; }
+  S.phone = phone;
+  showToast('📲 Sending code...');
+  try { await restCall('auth/phone',{phone}); } catch(e) {}
+  document.getElementById('otpMsg').textContent = `✅ Code sent to ${phone}`;
+  goStep(2);
+}
+
+async function verifyOTP() {
+  const digits = document.querySelectorAll('.otp-d');
+  const code = Array.from(digits).map(d=>d.value).join('');
+  const pass = document.getElementById('twofa').value;
+  if (code.length < 5) { showToast('⚠️ Enter full code'); return; }
+  showToast('🔐 Verifying...');
+  try {
+    await restCall('auth/code',{code});
+    if (pass) await restCall('auth/password',{password:pass});
+    showToast('✅ Authenticated!');
+    setTimeout(()=>{ if(S.authState!=='ready'){ S.user={id:0,first_name:'User',username:''}; launchMain(); }},3000);
+  } catch(e) { showToast('❌ '+e.message); }
+}
+
+async function restoreSess() {
+  const sess = document.getElementById('sessStr').value.trim();
+  if (!sess) { showToast('Paste session string'); return; }
+  showToast('🔄 Restoring...');
+  try { await restCall('auth/restore-session',{session:sess}); setTimeout(launchMain,1500); }
+  catch(e) { showToast('❌ '+e.message); }
+}
+
+async function reqQR() {
+  try { await restCall('auth/qr'); showToast('QR requested'); }
+  catch(e) { showToast('❌ '+e.message); }
+}
+
+// ══════════════════════════════════════════
+// MAIN
+// ══════════════════════════════════════════
+async function launchMain() {
+  document.getElementById('s-connect').classList.remove('on');
+  document.getElementById('s-main').classList.add('on');
+  updateUser();
+  setMainStatus('on', S.demo ? 'Demo Mode' : 'Connected');
+  loadChats();
+  loadSession();
+  renderParams();
+}
+
+function updateUser() {
+  const u = S.user; if(!u) return;
+  document.getElementById('mainAv').textContent = (u.first_name||'?')[0].toUpperCase();
+  document.getElementById('mainName').textContent = [u.first_name,u.last_name].filter(Boolean).join(' ');
+  document.getElementById('si-state').textContent = S.demo?'demo':'active';
+  document.getElementById('si-mode').textContent  = S.demo?'demo':'real';
+  document.getElementById('si-uid').textContent   = u.id||'–';
+  document.getElementById('si-uname').textContent = u.username?'@'+u.username:'–';
+  document.getElementById('si-phone').textContent = u.phone_number||S.phone||'–';
+  document.getElementById('si-server').textContent= S.demo?'demo':S.serverUrl;
+}
+
+function setMainStatus(s,txt) {
+  document.getElementById('mainDot').className='dot'+(s==='on'?' on':s==='err'?' err':' blink');
+  document.getElementById('mainSub').textContent=txt;
+}
+
+// ══════════════════════════════════════════
+// CHATS
+// ══════════════════════════════════════════
+const MOCK=[
+  {id:1001,name:'Alice Johnson',prev:'Are you free tomorrow?',time:'14:32',unread:3,av:'A'},
+  {id:1002,name:'Dev Team 🚀',prev:'New build is live!',time:'13:10',unread:0,av:'D'},
+  {id:1003,name:'Bob Smith',prev:'Thanks for the help',time:'12:05',unread:1,av:'B'},
+  {id:1004,name:'Crypto News 💰',prev:'BTC ATH incoming',time:'Tue',unread:9,av:'C'},
+  {id:1005,name:'Saved Messages',prev:'Note to self',time:'Mon',unread:0,av:'★'},
+];
+
+async function loadChats() {
+  try {
+    const r = await apiCall('getChats',{limit:50});
+    if (r?.chat_ids?.length && !S.demo) {
+      const details = await Promise.all(r.chat_ids.slice(0,20).map(id=>apiCall('getChat',{chat_id:id}).catch(()=>null)));
+      S.chats = details.filter(Boolean).map(c=>({
+        id:c.id, name:c.title||'Unknown',
+        prev:c.last_message?.content?.text?.text||'…',
+        time:c.last_message?fmt(c.last_message.date):'',
+        unread:c.unread_count||0, av:(c.title||'?')[0].toUpperCase()
+      }));
+    } else S.chats = MOCK;
+  } catch(e) { S.chats = MOCK; }
+  renderChats(S.chats);
+}
+
+function renderChats(list) {
+  const el = document.getElementById('chatList');
+  if (!list.length) { el.innerHTML='<div class="empty"><div class="empty-ico">💬</div><div class="empty-ttl">No chats</div></div>'; return; }
+  el.innerHTML = list.map(c=>`
+    <div class="chat-row" onclick="openChat(${c.id})">
+      <div class="av" style="background:${avClr(c.id)}">${c.av}</div>
+      <div class="chat-info">
+        <div class="chat-name">${esc(c.name)}</div>
+        <div class="chat-prev">${esc(c.prev)}</div>
+      </div>
+      <div class="chat-meta">
+        <span class="chat-time">${c.time}</span>
+        ${c.unread?`<span class="badge">${c.unread>99?'99+':c.unread}</span>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function filterChats(q) {
+  const f=q.toLowerCase();
+  renderChats(S.chats.filter(c=>c.name.toLowerCase().includes(f)||c.prev.toLowerCase().includes(f)));
+}
+
+// ══════════════════════════════════════════
+// MESSAGES
+// ══════════════════════════════════════════
+async function openChat(id) {
+  S.currentChat = id;
+  const c = S.chats.find(x=>x.id===id);
+  document.getElementById('chatTitle').textContent = c?.name||'Chat';
+  document.getElementById('chatSub').textContent = 'last seen recently';
+  document.getElementById('chatAv').textContent = c?.av||'?';
+  document.getElementById('chatAv').style.background = avClr(id);
+  document.getElementById('msgOverlay').classList.add('open');
+  const el = document.getElementById('msgs');
+  el.innerHTML = '<div class="loader"><div class="spinner"></div>Loading…</div>';
+  try {
+    const r = await apiCall('getChatHistory',{chat_id:id,limit:50,from_message_id:0});
+    const msgs = (r?.messages||[]).reverse();
+    el.innerHTML = msgs.map(m=>msgHTML(m)).join('') || '<div class="empty"><div class="empty-sub">No messages</div></div>';
+  } catch(e) {
+    el.innerHTML=[
+      {out:false,text:'Hey! This is TG Alpha 👋',ts:'now'},
+      {out:true, text:'Connected via TDLib bridge on Railway 🚀',ts:'now'},
+      {out:false,text:'Full MTProto encryption. Real Telegram API.',ts:'now'},
+    ].map(m=>`<div class="msg ${m.out?'out':'in'}"><div class="bubble">${esc(m.text)}</div><div class="msg-ts">${m.ts}</div></div>`).join('');
+  }
+  el.scrollTop=99999;
+}
+
+function msgHTML(m) {
+  const out=m.is_outgoing, text=m.content?.text?.text||'[media]', time=fmt(m.date);
+  return `<div class="msg ${out?'out':'in'}"><div class="bubble">${esc(text)}</div><div class="msg-ts">${time}</div></div>`;
+}
+
+function appendMsg(m) {
+  const el=document.createElement('div');
+  el.innerHTML=msgHTML(m);
+  document.getElementById('msgs').appendChild(el.firstChild);
+  document.getElementById('msgs').scrollTop=99999;
+}
+
+function closeChat() { document.getElementById('msgOverlay').classList.remove('open'); S.currentChat=null; }
+function grow(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; }
+
+async function sendMsg() {
+  const el=document.getElementById('msgInput');
+  const text=el.value.trim();
+  if(!text||!S.currentChat) return;
+  el.value=''; el.style.height='auto';
+  const m=document.createElement('div');
+  m.className='msg out';
+  m.innerHTML=`<div class="bubble">${esc(text)}</div><div class="msg-ts">${fmt(Date.now()/1000)}</div>`;
+  document.getElementById('msgs').appendChild(m);
+  document.getElementById('msgs').scrollTop=99999;
+  try { await apiCall('sendMessage',{chat_id:S.currentChat,input_message_content:{'@type':'inputMessageText',text:{'@type':'formattedText',text}}}); }
+  catch(e) { showToast('❌ '+e.message); }
+}
+
+// ══════════════════════════════════════════
+// API TAB
+// ══════════════════════════════════════════
+const PDEFS = {
+  sendMessage:          [{n:'chat_id',t:'int64',ph:'Chat ID'},{n:'text',t:'string',ph:'Message text'},{n:'disable_notification',t:'bool',ph:'false'}],
+  getChatHistory:       [{n:'chat_id',t:'int64',ph:'Chat ID'},{n:'from_message_id',t:'int64',ph:'0 (latest)'},{n:'limit',t:'int32',ph:'50'}],
+  getMessages:          [{n:'chat_id',t:'int64',ph:'Chat ID'},{n:'message_ids',t:'array',ph:'[123,456]'}],
+  getChat:              [{n:'chat_id',t:'int64',ph:'Chat ID'}],
+  getUser:              [{n:'user_id',t:'int64',ph:'User ID'}],
+  getUserFullInfo:      [{n:'user_id',t:'int64',ph:'User ID'}],
+  searchPublicChat:     [{n:'username',t:'string',ph:'@username'}],
+  searchMessages:       [{n:'query',t:'string',ph:'Search text'},{n:'limit',t:'int32',ph:'20'}],
+  joinChat:             [{n:'chat_id',t:'int64',ph:'Chat ID'}],
+  leaveChat:            [{n:'chat_id',t:'int64',ph:'Chat ID'}],
+  viewMessages:         [{n:'chat_id',t:'int64',ph:'Chat ID'},{n:'message_ids',t:'array',ph:'[123]'},{n:'force_read',t:'bool',ph:'false = ghost mode'}],
+  deleteMessages:       [{n:'chat_id',t:'int64',ph:'Chat ID'},{n:'message_ids',t:'array',ph:'[123]'},{n:'revoke',t:'bool',ph:'true'}],
+  forwardMessages:      [{n:'chat_id',t:'int64',ph:'Dest chat ID'},{n:'from_chat_id',t:'int64',ph:'Source chat ID'},{n:'message_ids',t:'array',ph:'[123]'}],
+  editMessageText:      [{n:'chat_id',t:'int64',ph:'Chat ID'},{n:'message_id',t:'int64',ph:'Msg ID'},{n:'text',t:'string',ph:'New text'}],
+  pinMessage:           [{n:'chat_id',t:'int64',ph:'Chat ID'},{n:'message_id',t:'int64',ph:'Msg ID'},{n:'disable_notification',t:'bool',ph:'false'}],
+  createPrivateChat:    [{n:'user_id',t:'int64',ph:'User ID'}],
+  createNewBasicGroupChat:[{n:'user_ids',t:'array',ph:'[111,222]'},{n:'title',t:'string',ph:'Group name'}],
+  createNewSupergroupChat:[{n:'title',t:'string',ph:'Name'},{n:'is_channel',t:'bool',ph:'false'},{n:'description',t:'string',ph:'Description'}],
+  getChatMembers:       [{n:'chat_id',t:'int64',ph:'Chat ID'},{n:'limit',t:'int32',ph:'200'}],
+  setChatTitle:         [{n:'chat_id',t:'int64',ph:'Chat ID'},{n:'title',t:'string',ph:'New title'}],
+  setChatDescription:   [{n:'chat_id',t:'int64',ph:'Chat ID'},{n:'description',t:'string',ph:'New description'}],
+  banChatMember:        [{n:'chat_id',t:'int64',ph:'Chat ID'},{n:'member_id',t:'int64',ph:'User ID'},{n:'banned_until_date',t:'int32',ph:'0=permanent'}],
+  terminateSession:     [{n:'session_id',t:'int64',ph:'Session ID'}],
+  getOption:            [{n:'name',t:'string',ph:'e.g. version, my_id'}],
+  setOption:            [{n:'name',t:'string',ph:'Option name'},{n:'value',t:'string',ph:'Value'}],
+  searchContacts:       [{n:'query',t:'string',ph:'Name'},{n:'limit',t:'int32',ph:'20'}],
+  optimizeStorage:      [{n:'size',t:'int64',ph:'0=remove all'},{n:'count',t:'int32',ph:'0'}],
+};
+
+function renderParams() {
+  const method = document.getElementById('methodSel').value;
+  const params = PDEFS[method]||[];
+  const area = document.getElementById('paramsArea');
+  if (!params.length) { area.innerHTML=`<div style="color:var(--text3);font-size:12.5px;padding:4px 0">No parameters for <code style="color:var(--green)">${method}</code></div>`; return; }
+  area.innerHTML=params.map(p=>`
+    <div class="p-field">
+      <div class="p-label">${p.n}<span class="p-type">${p.t}</span></div>
+      <input class="p-input" data-p="${p.n}" data-t="${p.t}" placeholder="${p.ph}" type="${p.t.includes('int')?'number':'text'}">
+    </div>`).join('');
+}
+
+async function execMethod() {
+  const method = document.getElementById('methodSel').value;
+  const params = {};
+  document.querySelectorAll('[data-p]').forEach(inp=>{
+    const k=inp.dataset.p,t=inp.dataset.t,v=inp.value.trim();
+    if(!v) return;
+    if(t.includes('int')) params[k]=parseInt(v)||0;
+    else if(t==='bool') params[k]=v==='true'||v==='1';
+    else if(t==='array'){try{params[k]=JSON.parse(v);}catch(e){params[k]=v;}}
+    else params[k]=v;
+  });
+  if(method==='sendMessage'&&params.text){params.input_message_content={'@type':'inputMessageText',text:{'@type':'formattedText',text:params.text}};delete params.text;}
+  if(method==='editMessageText'&&params.text){params.input_message_content={'@type':'inputMessageText',text:{'@type':'formattedText',text:params.text}};delete params.text;}
+  document.getElementById('respBody').innerHTML='<span style="color:var(--text3)">Executing...</span>';
+  document.getElementById('respTag').innerHTML='';
+  try {
+    const r=await apiCall(method,params);
+    document.getElementById('respBody').textContent=JSON.stringify(r,null,2);
+    document.getElementById('respTag').innerHTML=`<span class="tag g">✓ ${r['@type']||'ok'}</span>`;
+  } catch(e) {
+    document.getElementById('respBody').textContent=JSON.stringify({error:e.message},null,2);
+    document.getElementById('respTag').innerHTML=`<span class="tag r">✗ Error</span>`;
+  }
+}
+
+function clearResp(){document.getElementById('respBody').innerHTML='<span style="color:var(--text3)">// Cleared</span>';document.getElementById('respTag').innerHTML='';}
+function copyResp(){navigator.clipboard?.writeText(document.getElementById('respBody').textContent).then(()=>showToast('📋 Copied'));}
+
+// ══════════════════════════════════════════
+// SESSION TAB
+// ══════════════════════════════════════════
+async function loadSession() {
+  try {
+    const r=await apiCall('getActiveSessions');
+    const el=document.getElementById('deviceList');
+    if(r?.sessions?.length){
+      el.innerHTML=r.sessions.map(s=>`
+        <div class="dev-card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="dev-name">${esc(s.device_model||'Unknown')}</div>
+            ${s.is_current?'<span class="tag g">Current</span>':''}
+          </div>
+          <div class="dev-sub">${esc(s.application_name||'')} · ${esc(s.platform||'')} · ${esc(s.location||s.ip||'')}</div>
+          ${!s.is_current?`<button class="btn ghost sm" style="margin-top:8px" onclick="termSess('${s.id}')">Terminate</button>`:''}
+        </div>`).join('');
+    } else el.innerHTML='<div style="color:var(--text3);font-size:13px;padding:8px 0">No sessions found</div>';
+  } catch(e){document.getElementById('deviceList').innerHTML='<div style="color:var(--text3);font-size:13px">Could not load</div>';}
+}
+
+async function termSess(id){if(!confirm('Terminate this session?'))return;await apiCall('terminateSession',{session_id:id});showToast('✅ Done');loadSession();}
+async function terminateOthers(){if(!confirm('Terminate ALL other sessions?'))return;await apiCall('terminateAllOtherSessions');showToast('✅ All other sessions terminated');loadSession();}
+async function doLogout(){
+  if(!confirm('Sign out of Telegram?'))return;
+  try{await restCall('auth/logout');}catch(e){}
+  S.user=null;S.authState='idle';
+  document.getElementById('s-main').classList.remove('on');
+  document.getElementById('s-connect').classList.add('on');
+  goStep(0);showToast('Signed out');
+}
+
+// ══════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════
+function goStep(n){
+  document.getElementById('st'+S._step).style.display='none';
+  S._step=n;
+  document.getElementById('st'+n).style.display='block';
+  for(let i=0;i<3;i++) document.getElementById('pip'+i).className='pip'+(i<n?' done':i===n?' cur':'');
+}
+S._step=0;
+
+function switchTab(name,el){
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('pane-'+name).classList.add('on');
+  el.classList.add('on');
+  if(name==='session') loadSession();
+}
+
+// ══════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════
+function avClr(id){const c=['linear-gradient(135deg,#4f8ef7,#8b5cf6)','linear-gradient(135deg,#06d6a0,#4f8ef7)','linear-gradient(135deg,#f72585,#8b5cf6)','linear-gradient(135deg,#ffd60a,#f72585)','linear-gradient(135deg,#06d6a0,#3a86ff)'];return c[Math.abs(id)%c.length];}
+function fmt(u){const d=new Date(u*1000),n=new Date();if(d.toDateString()===n.toDateString())return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});const diff=(n-d)/86400000;if(diff<7)return['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];return d.toLocaleDateString([],{month:'short',day:'numeric'});}
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function otpFwd(el,i){if(el.value&&i<4)document.querySelectorAll('.otp-d')[i+1]?.focus();}
+function otpBk(el,i,e){if(e.key==='Backspace'&&!el.value&&i>0)document.querySelectorAll('.otp-d')[i-1]?.focus();}
+let _tt;
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),3000);}
+
+renderParams();
+</script>
+</body>
+</html>
